@@ -33,7 +33,7 @@ const nightCostEl = document.getElementById('night-cost');
 // Summary ELs
 const summaryTotal = document.getElementById('summary-total');
 const lastMonthTotalEl = document.getElementById('last-month-total');
-const monthChangeEl = document.getElementById('month-change');
+// const monthChangeEl = document.getElementById('month-change');
 const summaryLitres = document.getElementById('summary-litres');
 const summaryAvg = document.getElementById('summary-avg');
 const mostExpEl = document.getElementById('most-expensive');
@@ -531,12 +531,11 @@ function updateSummary(current, last) {
     summaryTotal.innerText = `₹${totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
     lastMonthTotalEl.innerText = `₹${lastTotalCost.toFixed(2)}`;
 
-    let change = 0;
-    if (lastTotalCost > 0) change = ((totalCost - lastTotalCost) / lastTotalCost) * 100;
-    else if (totalCost > 0) change = 100;
-
-    monthChangeEl.innerText = `${change > 0 ? '+' : ''}${change.toFixed(0)}%`;
-    monthChangeEl.style.color = change >= 0 ? 'var(--danger)' : 'var(--success)';
+    // Change metric removed
+    // let change = 0;
+    // if (lastTotalCost > 0) change = ((totalCost - lastTotalCost) / lastTotalCost) * 100;
+    // monthChangeEl.innerText = `${change > 0 ? '+' : ''}${change.toFixed(0)}%`;
+    // monthChangeEl.style.color = change >= 0 ? 'var(--danger)' : 'var(--success)';
 
     const totalLitres = current.reduce((acc, e) => acc + (e.morningLitres || 0) + (e.nightLitres || 0), 0);
     summaryLitres.innerText = `${totalLitres} L`;
