@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Milk Expense Tracker</title>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="main-header">
+        <h1>Personal Milk Tracker</h1>
+        <nav class="main-nav">
+            <button id="nav-calendar" class="active"><i data-lucide="calendar"></i> Calendar</button>
+            <button id="nav-analysis"><i data-lucide="bar-chart-2"></i> Analysis</button>
+            <button id="calc-toggle" title="Calculator"><i data-lucide="calculator"></i></button>
+        </nav>
+    </header>
+
+    <div class="app-container">
+
+        <!-- CALENDAR VIEW -->
+        <main id="view-calendar" class="view-section active">
+            <div class="calendar-layout">
+                <!-- Calendar Section -->
+                <section class="calendar-section">
+                    <div class="calendar-toolbar">
+                        <div class="month-nav">
+                            <button id="prev-month"><i data-lucide="chevron-left"></i></button>
+                            <h2 id="current-month-display">October 2025</h2>
+                            <button id="next-month"><i data-lucide="chevron-right"></i></button>
+                        </div>
+
+                        <div class="date-filters">
+                            <div class="filter-group">
+                                <label>From</label>
+                                <input type="date" id="filter-start">
+                            </div>
+                            <div class="filter-group">
+                                <label>To</label>
+                                <input type="date" id="filter-end">
+                            </div>
+                            <button class="btn-secondary" id="filter-apply">Apply</button>
+                            <button id="filter-clear">Clear</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="calendar-wrapper">
+                        <div class="calendar-grid" id="calendar-grid">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+
+                    <!-- Fixed Pagination Footer -->
+                    <div id="pagination-controls" class="pagination-controls hidden"></div>
+                </section>
+
+                <!-- Summary Section -->
+                <section class="summary-section">
+                    <div class="summary-card">
+                        <h3>Monthly Summary</h3>
+
+                        <div class="summary-big-total">
+                            <h1 id="summary-total">₹0.00</h1>
+                        </div>
+
+                        <div class="mini-stats">
+                            <div class="mini-stat">
+                                <span>Last month:</span>
+                                <span id="last-month-total">₹0.00</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span>Change:</span>
+                                <span id="month-change">+0%</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span class="label">Total litres</span>
+                                <span class="value" id="summary-litres">0 L</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="label">Avg / day</span>
+                                <span class="value" id="summary-avg">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="expensive-stats">
+                            <div class="exp-row">
+                                <span>Most expensive:</span>
+                                <span id="most-expensive" class="val">—</span>
+                            </div>
+                            <div class="exp-row">
+                                <span>Least expensive:</span>
+                                <span id="least-expensive" class="val">—</span>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <canvas id="dailyChart"></canvas>
+                        </div>
+
+                        <div class="actions">
+                            <button id="export-pdf" class="btn-outline">
+                                <i data-lucide="download"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- ANALYSIS VIEW -->
+        <main id="view-analysis" class="view-section">
+            <div class="analysis-layout">
+                <div class="analysis-header">
+                    <h2>Yearly Overview</h2>
+                    <select id="analysis-year-select">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="analysis-card full-width">
+                        <h3>Monthly Spending</h3>
+                        <div class="chart-wrapper-large">
+                            <canvas id="yearlyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>Yearly Total</h3>
+                        <div class="big-number" id="year-total">₹0.00</div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>Total Litres</h3>
+                        <div class="big-number" id="year-litres">0 L</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Modal -->
+    <div id="entry-modal" class="modal hidden">
+        <div class="modal-content new-design">
+            <div class="modal-header-new">
+                <h2 id="modal-date-title">01-12-2025 — Monday</h2>
+            </div>
+
+            <div class="modal-body-new">
+                <form id="entry-form">
+
+                    <div class="input-row">
+                        <label class="icon-label"><i data-lucide="tag"></i> Price / L (₹)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="price-input" step="0.5" value="60">
+                        </div>
+                    </div>
+
+                    <div class="input-row split-cost">
+                        <div class="main-input">
+                            <label class="icon-label"><i data-lucide="sun"></i> Morning (L)</label>
+                            <input type="number" id="morning-input" step="0.5" min="0" placeholder="0">
+                        </div>
+                        <div class="cost-display" id="morning-cost">₹0.00</div>
+                    </div>
+
+                    <div class="input-row split-cost">
+                        <div class="main-input">
+                            <label class="icon-label"><i data-lucide="moon"></i> Night (L)</label>
+                            <input type="number" id="night-input" step="0.5" min="0" placeholder="0">
+                        </div>
+                        <div class="cost-display" id="night-cost">₹0.00</div>
+                    </div>
+
+                    <div class="input-row">
+                        <label class="icon-label"><i data-lucide="sticky-note"></i> Notes</label>
+                        <input type="text" id="notes-input" placeholder="Notes...">
+                    </div>
+
+                    <div class="total-row">
+                        <span>Total</span>
+                        <span id="live-total">₹0.00</span>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer-new">
+                <button id="btn-delete" class="btn-ghost">Clear</button>
+                <div class="right-actions">
+                    <button id="btn-cancel" class="btn-text">Cancel</button>
+                    <button id="btn-save" class="btn-solid">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Calculator -->
+    <div id="calculator-panel" class="calculator-panel hidden">
+        <div class="calc-header">
+            <span>Calculator</span>
+            <button id="calc-close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="calc-display">
+            <div id="calc-prev-operand" class="calc-prev"></div>
+            <div id="calc-current-operand" class="calc-curr">0</div>
+        </div>
+        <div class="calc-grid">
+            <button class="btn-calc op" data-op="MC">MC</button> <!-- Memory Clear -->
+            <button class="btn-calc op" data-op="MR">MR</button> <!-- Memory Recall -->
+            <button class="btn-calc op" data-op="M+">M+</button> <!-- Memory Add -->
+            <button class="btn-calc op" data-op="M-">M-</button> <!-- Memory Subtract -->
+            <button class="btn-calc op" data-op="MS">MS</button> <!-- Memory Store -->
+
+            <button class="btn-calc" data-op="%">%</button>
+            <button class="btn-calc" data-op="CE">CE</button>
+            <button class="btn-calc" data-op="C">C</button>
+            <button class="btn-calc" data-op="DEL"><i data-lucide="delete"></i></button>
+
+            <button class="btn-calc" data-op="1/x">⅟ₓ</button>
+            <button class="btn-calc" data-op="x2">x²</button>
+            <button class="btn-calc" data-op="sqrt">√</button>
+            <button class="btn-calc op-main" data-op="÷">÷</button>
+
+            <button class="btn-calc num" data-num="7">7</button>
+            <button class="btn-calc num" data-num="8">8</button>
+            <button class="btn-calc num" data-num="9">9</button>
+            <button class="btn-calc op-main" data-op="*">×</button>
+
+            <button class="btn-calc num" data-num="4">4</button>
+            <button class="btn-calc num" data-num="5">5</button>
+            <button class="btn-calc num" data-num="6">6</button>
+            <button class="btn-calc op-main" data-op="-">−</button>
+
+            <button class="btn-calc num" data-num="1">1</button>
+            <button class="btn-calc num" data-num="2">2</button>
+            <button class="btn-calc num" data-num="3">3</button>
+            <button class="btn-calc op-main" data-op="+">+</button>
+
+            <button class="btn-calc" data-op="plus-minus">±</button>
+            <button class="btn-calc num" data-num="0">0</button>
+            <button class="btn-calc num" data-num=".">.</button>
+            <button class="btn-calc eq" data-op="=">=</button>
+        </div>
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
