@@ -346,6 +346,14 @@ function createDayCard(dateObj, entry) {
     const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
     const dd_mm = `${d}-${m}-${y}`;
 
+    // Highlight Today
+    const today = new Date();
+    if (dateObj.getDate() === today.getDate() &&
+        dateObj.getMonth() === today.getMonth() &&
+        dateObj.getFullYear() === today.getFullYear()) {
+        card.classList.add('today-highlight');
+    }
+
     let html = `
         <div class="day-header">
             <span>${dd_mm} ${dayName}</span>

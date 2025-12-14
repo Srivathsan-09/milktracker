@@ -802,3 +802,16 @@ input:focus {
 .btn-calc.eq:hover {
     filter: brightness(1.1);
 }
+
+/* Highlight Today */
+.today-highlight {
+    border: 2px solid var(--primary) !important;
+    background-color: rgba(91, 77, 219, 0.05);
+    position: relative;
+    box-shadow: 0 0 15px rgba(91, 77, 219, 0.2);
+}
+
+.today-highlight .day-header span {
+    color: var(--primary);
+    font-weight: 800;
+}
