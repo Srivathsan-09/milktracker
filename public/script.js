@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupCharts();
     populateAnalysisYears();
+    initTheme();
 
 
 });
@@ -65,6 +66,7 @@ function setupEventListeners() {
     // Nav
     document.getElementById('nav-calendar').addEventListener('click', () => switchView('calendar'));
     document.getElementById('nav-analysis').addEventListener('click', () => switchView('analysis'));
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
     // Calendar Controls
     document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
@@ -942,3 +944,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+/* THEME LOGIC */
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    // Timeout to ensure charts are created if race condition, though setupCharts runs before initTheme in DOMContentLoaded
+    setTimeout(updateChartsTheme, 100);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const newTheme = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+    updateChartsTheme();
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+
+    // Reset to initial state for Lucide to pick up
+    btn.innerHTML = theme === 'dark'
+        ? '<i data-lucide="sun"></i>'
+        : '<i data-lucide="moon"></i>';
+
+    if (window.lucide) {
+        window.lucide.createIcons({
+            root: btn
+        });
+    }
+}
+
+function updateChartsTheme() {
+    // Get CSS Variable
+    const style = getComputedStyle(document.documentElement);
+    const primary = style.getPropertyValue('--primary').trim();
+
+    if (dailyChart) {
+        dailyChart.data.datasets[0].borderColor = primary;
+        // Optional: Update background color alpha if desired, but sticking to primary is consistent
+        // dailyChart.data.datasets[0].backgroundColor = ... 
+        dailyChart.update();
+    }
+
+    if (yearlyChart) {
+        yearlyChart.data.datasets[0].backgroundColor = primary;
+        yearlyChart.update();
+    }
+}
