@@ -142,6 +142,8 @@ async function loadMonthData() {
     document.getElementById('prev-month').style.display = 'inline-block';
     document.getElementById('next-month').style.display = 'inline-block';
 
+    let lastEntries = [];
+
     try {
         const mStr = String(currentMonth + 1).padStart(2, '0');
         const res = await fetch(`${API_URL}/month?year=${currentYear}&month=${mStr}&v=${Date.now()}`);
@@ -158,7 +160,6 @@ async function loadMonthData() {
         console.log(`Loaded ${entries.length} entries for ${currentMonthDisplay.innerText}`);
 
         // Fetch last month safely
-        let lastEntries = [];
         try {
             let lastM = currentMonth - 1;
             let lastY = currentYear;
@@ -172,6 +173,12 @@ async function loadMonthData() {
 
         lastEntries = Array.isArray(lastEntries) ? lastEntries : [];
 
+    } catch (err) {
+        console.error("Error fetching data:", err);
+        // Important: If offline, we still want to render the empty calendar
+        // so we ensure entries is an empty array if it wasn't set successfully
+        if (!entries) entries = [];
+    } finally {
         // Race condition check: if user switched to filter mode while we were fetching month data, don't overwrite
         if (isFilterMode) {
             console.log("loadMonthData fetch finished but isFilterMode is true. Skipping render.");
@@ -180,8 +187,6 @@ async function loadMonthData() {
 
         renderCalendar();
         updateSummary(entries, lastEntries);
-    } catch (err) {
-        console.error("Error fetching data:", err);
     }
 }
 
