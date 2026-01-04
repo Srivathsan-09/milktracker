@@ -1,6 +1,4 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5001'
-    ? 'http://localhost:5001/api/milk'
-    : '/api/milk';
+const API_URL = 'http://localhost:5001/api/milk';
 
 // State
 let currentDate = new Date();
