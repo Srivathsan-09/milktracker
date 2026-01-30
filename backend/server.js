@@ -19,7 +19,6 @@ app.use('/api/milk', milkRoutes);
 
 /* -------------------- EXPORT (IMPORTANT) -------------------- */
 /*
-❌ DO NOT use app.listen() for Catalyst
-Catalyst will handle the server
+
 */
 module.exports = app;
