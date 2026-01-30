@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
+    "start": "node backend/local.js",
+    "dev": "nodemon backend/local.js",
     "build": "echo Build step not required for backend"
   },
   "keywords": [],
